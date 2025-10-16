@@ -21,7 +21,7 @@ JOIN film f ON fc.film_id = f.film_id
 GROUP BY ca.name;
 
 
-SELECT name AS "Category", AVG(f.length) AS "AVG_Length"
+SELECT name AS "Category", SUM(f.length) AS "AVG_Length"
 FROM category ca
 JOIN film_category fc ON ca.category_id = fc.category_id
 JOIN film f ON fc.film_id = f.film_id
