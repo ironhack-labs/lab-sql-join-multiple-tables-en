@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="solution.db" readonly="0" foreign_keys="0" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="6591"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="actor" custom_title="0" dock_id="1" table="4,5:mainactor"/><dock_state state="000000ff00000000fd00000001000000020000043c000002befc0100000001fb000000160064006f0063006b00420072006f007700730065003101000000000000043c0000012400ffffff0000025c0000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="actor" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="54"/><column index="2" value="93"/><column index="3" value="101"/><column index="4" value="156"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">SELECT s.store_id, ci.city, co.country
+FROM store s
+JOIN address a ON s.address_id = a.address_id
+JOIN city ci ON a.city_id = ci.city_id
+JOIN country co ON ci.country_id = co.country_id;
+
+SELECT s.store_id, sum(p.amount) AS total_sales
+FROM store s
+JOIN staff st ON s.store_id = st.store_id
+JOIN payment p ON st.staff_id = p.staff_id
+GROUP BY s.store_id;
+
+SELECT c.name AS category, avg(f.length) AS avg_runtime
+FROM film f
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+GROUP by c.name;
+
+SELECT c.name as category, Avg(f.length) as avg_runtime
+FROM film f
+JOIN film_category fc on f.film_id = fc.film_id
+JOIN category c on fc.category_id = c.category_id
+GROUP by c.name
+ORDER by avg_runtime DESC;
+
+SELECT f.title, count(r.rental_id) as rental_count
+FROM film f
+JOIN inventory i on f.film_id = i.film_id
+JOIN rental r on i.inventory_id = r.inventory_id
+GROUP by f.title
+ORDER by rental_count DESC;
+
+
+SELECT c.name AS category, SUM(p.amount) AS total_revenue
+FROM payment p
+JOIN rental r ON p.rental_id = r.rental_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+GROUP BY c.name
+ORDER BY total_revenue DESC
+LIMIT 5;
+
+SELECT
+    f.title,
+	i.inventory_id,
+	i.store_id,
+	ifnull(r.rental_id, 'available') as status
+FROM film f
+JOIN inventory i on f.film_id = i.film_id
+LEFT JOIN rental r on i.inventory_id = r.inventory_id AND r.return_date is NULL
+WHERE f.title = 'academy dinosaur' AND i.store_id = 1 AND r.rental_id is NULL;</sql><current_tab id="0"/></tab_sql></sqlb_project>
