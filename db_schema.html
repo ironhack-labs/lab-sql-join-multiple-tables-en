@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Esquema de Base de Datos - Sistema de Películas</title>
+  <style>
+    :root {
+      --primary: #3498db;
+      --primary-dark: #2980b9;
+      --secondary: #2ecc71;
+      --accent: #e74c3c;
+      --danger: #c0392b;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --gray: #bdc3c7;
+      --white: #fff;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      position: relative;
+      min-height: 1200px;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid var(--primary);
+    }
+    
+    h1 {
+      color: var(--dark);
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 1.2rem;
+    }
+    
+    .schema-container {
+      position: relative;
+      min-height: 1000px;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 30px;
+      overflow: auto;
+    }
+    
+    .tables-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .table {
+      background: var(--white);
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .table-header {
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 12px 15px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .table-content {
+      max-height: none;
+    }
+    
+    .column {
+      padding: 8px 15px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    
+    .column:last-child {
+      border-bottom: none;
+    }
+    
+    .pk {
+      font-weight: bold;
+      color: var(--danger);
+      background-color: rgba(231, 76, 60, 0.05);
+    }
+    
+    .fk {
+      color: var(--primary-dark);
+      font-style: italic;
+      background-color: rgba(52, 152, 219, 0.05);
+    }
+    
+    .column-icon {
+      margin-right: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .relationships-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    .relationship-line {
+      stroke: var(--primary);
+      stroke-width: 3;
+      marker-end: url(#arrowhead);
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    }
+    
+    .relationship-line-dashed {
+      stroke: var(--accent);
+      stroke-width: 3;
+      stroke-dasharray: 8, 5;
+      marker-end: url(#arrowhead-dashed);
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    }
+    
+    .relationship-line-thick {
+      stroke: var(--secondary);
+      stroke-width: 4;
+      marker-end: url(#arrowhead-thick);
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    }
+    
+    .legend {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .legend h2 {
+      color: var(--dark);
+      margin-bottom: 15px;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 8px;
+    }
+    
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 25px;
+    }
+    
+    .legend-color {
+      width: 25px;
+      height: 25px;
+      margin-right: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    .legend-pk {
+      background-color: var(--danger);
+    }
+    
+    .legend-fk {
+      background-color: var(--primary);
+    }
+    
+    .legend-relationship {
+      background-color: var(--primary);
+    }
+    
+    .legend-relationship-dashed {
+      background: repeating-linear-gradient(
+        45deg,
+        var(--accent),
+        var(--accent) 5px,
+        transparent 5px,
+        transparent 10px
+      );
+    }
+    
+    .legend-relationship-thick {
+      background-color: var(--secondary);
+    }
+    
+    .table-highlight {
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 15px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: bold;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    @media (max-width: 1400px) {
+      .tables-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (max-width: 1100px) {
+      .tables-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .tables-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Esquema de Base de Datos - Sistema de Películas</h1>
+      <p class="subtitle">Base de datos para gestión de películas, actores, clientes y alquileres</p>
+    </header>
+    
+    <div class="controls">
+      <button class="btn" id="highlight-pk">Resaltar Claves Primarias</button>
+      <button class="btn" id="highlight-fk">Resaltar Claves Foráneas</button>
+      <button class="btn" id="reset-highlight">Quitar Resaltado</button>
+    </div>
+    
+    <div class="schema-container">
+      <svg class="relationships-layer" id="relationships-layer">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                  refX="10" refY="3.5" orient="auto" fill="#3498db">
+            <polygon points="0 0, 10 3.5, 0 7" />
+          </marker>
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" 
+                  refX="10" refY="3.5" orient="auto" fill="#e74c3c">
+            <polygon points="0 0, 10 3.5, 0 7" />
+          </marker>
+          <marker id="arrowhead-thick" markerWidth="12" markerHeight="8" 
+                  refX="12" refY="4" orient="auto" fill="#2ecc71">
+            <polygon points="0 0, 12 4, 0 8" />
+          </marker>
+        </defs>
+        <!-- Las líneas de relación se dibujarán aquí -->
+      </svg>
+      
+      <div class="tables-grid" id="tables-grid">
+        <!-- Tablas se generarán dinámicamente con JavaScript -->
+      </div>
+    </div>
+    
+    <div class="legend">
+      <h2>Leyenda</h2>
+      <div class="legend-items">
+        <div class="legend-item">
+          <div class="legend-color legend-pk"></div>
+          <span>Clave Primaria (PK)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-fk"></div>
+          <span>Clave Foránea (FK)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-relationship"></div>
+          <span>Relación Uno a Muchos</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-relationship-dashed"></div>
+          <span>Relación Muchos a Muchos</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color legend-relationship-thick"></div>
+          <span>Relación Circular/Especial</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Datos de las tablas
+    const tables = [
+      {
+        name: "actor",
+        columns: [
+          { name: "actor_id", type: "pk" },
+          { name: "first_name", type: "regular" },
+          { name: "last_name", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 1, col: 1 }
+      },
+      {
+        name: "address",
+        columns: [
+          { name: "address_id", type: "pk" },
+          { name: "address", type: "regular" },
+          { name: "address2", type: "regular" },
+          { name: "district", type: "regular" },
+          { name: "city_id", type: "fk" },
+          { name: "postal_code", type: "regular" },
+          { name: "phone", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 2, col: 3 }
+      },
+      {
+        name: "category",
+        columns: [
+          { name: "category_id", type: "pk" },
+          { name: "name", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 1, col: 4 }
+      },
+      {
+        name: "city",
+        columns: [
+          { name: "city_id", type: "pk" },
+          { name: "city", type: "regular" },
+          { name: "country_id", type: "fk" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 3, col: 3 }
+      },
+      {
+        name: "country",
+        columns: [
+          { name: "country_id", type: "pk" },
+          { name: "country", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 4, col: 3 }
+      },
+      {
+        name: "customer",
+        columns: [
+          { name: "customer_id", type: "pk" },
+          { name: "store_id", type: "fk" },
+          { name: "first_name", type: "regular" },
+          { name: "last_name", type: "regular" },
+          { name: "email", type: "regular" },
+          { name: "address_id", type: "fk" },
+          { name: "active", type: "regular" },
+          { name: "create_date", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 2, col: 2 }
+      },
+      {
+        name: "film",
+        columns: [
+          { name: "film_id", type: "pk" },
+          { name: "title", type: "regular" },
+          { name: "description", type: "regular" },
+          { name: "release_year", type: "regular" },
+          { name: "language_id", type: "fk" },
+          { name: "original_language_id", type: "fk" },
+          { name: "rental_duration", type: "regular" },
+          { name: "rental_rate", type: "regular" },
+          { name: "length", type: "regular" },
+          { name: "replacement_cost", type: "regular" },
+          { name: "rating", type: "regular" },
+          { name: "special_features", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 2, col: 1 }
+      },
+      {
+        name: "film_actor",
+        columns: [
+          { name: "actor_id", type: "pk" },
+          { name: "film_id", type: "pk" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 3, col: 1 }
+      },
+      {
+        name: "film_category",
+        columns: [
+          { name: "film_id", type: "pk" },
+          { name: "category_id", type: "pk" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 3, col: 4 }
+      },
+      {
+        name: "film_text",
+        columns: [
+          { name: "film_id", type: "pk" },
+          { name: "title", type: "regular" },
+          { name: "description", type: "regular" }
+        ],
+        position: { row: 4, col: 1 }
+      },
+      {
+        name: "inventory",
+        columns: [
+          { name: "inventory_id", type: "pk" },
+          { name: "film_id", type: "fk" },
+          { name: "store_id", type: "fk" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 3, col: 2 }
+      },
+      {
+        name: "language",
+        columns: [
+          { name: "language_id", type: "pk" },
+          { name: "name", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 1, col: 3 }
+      },
+      {
+        name: "payment",
+        columns: [
+          { name: "payment_id", type: "pk" },
+          { name: "customer_id", type: "fk" },
+          { name: "staff_id", type: "fk" },
+          { name: "rental_id", type: "fk" },
+          { name: "amount", type: "regular" },
+          { name: "payment_date", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 4, col: 2 }
+      },
+      {
+        name: "rental",
+        columns: [
+          { name: "rental_id", type: "pk" },
+          { name: "rental_date", type: "regular" },
+          { name: "inventory_id", type: "fk" },
+          { name: "customer_id", type: "fk" },
+          { name: "return_date", type: "regular" },
+          { name: "staff_id", type: "fk" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 5, col: 2 }
+      },
+      {
+        name: "staff",
+        columns: [
+          { name: "staff_id", type: "pk" },
+          { name: "first_name", type: "regular" },
+          { name: "last_name", type: "regular" },
+          { name: "address_id", type: "fk" },
+          { name: "picture", type: "regular" },
+          { name: "email", type: "regular" },
+          { name: "store_id", type: "fk" },
+          { name: "active", type: "regular" },
+          { name: "username", type: "regular" },
+          { name: "password", type: "regular" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 4, col: 4 }
+      },
+      {
+        name: "store",
+        columns: [
+          { name: "store_id", type: "pk" },
+          { name: "manager_staff_id", type: "fk" },
+          { name: "address_id", type: "fk" },
+          { name: "last_update", type: "regular" }
+        ],
+        position: { row: 5, col: 4 }
+      }
+    ];
+
+    // Relaciones entre tablas
+    const relationships = [
+      { from: "address", fromColumn: "city_id", to: "city", toColumn: "city_id", type: "one-to-many" },
+      { from: "city", fromColumn: "country_id", to: "country", toColumn: "country_id", type: "one-to-many" },
+      { from: "customer", fromColumn: "store_id", to: "store", toColumn: "store_id", type: "one-to-many" },
+      { from: "customer", fromColumn: "address_id", to: "address", toColumn: "address_id", type: "one-to-many" },
+      { from: "film", fromColumn: "language_id", to: "language", toColumn: "language_id", type: "one-to-many" },
+      { from: "film", fromColumn: "original_language_id", to: "language", toColumn: "language_id", type: "one-to-many" },
+      { from: "film_actor", fromColumn: "actor_id", to: "actor", toColumn: "actor_id", type: "many-to-many" },
+      { from: "film_actor", fromColumn: "film_id", to: "film", toColumn: "film_id", type: "many-to-many" },
+      { from: "film_category", fromColumn: "film_id", to: "film", toColumn: "film_id", type: "many-to-many" },
+      { from: "film_category", fromColumn: "category_id", to: "category", toColumn: "category_id", type: "many-to-many" },
+      { from: "film_text", fromColumn: "film_id", to: "film", toColumn: "film_id", type: "one-to-one" },
+      { from: "inventory", fromColumn: "film_id", to: "film", toColumn: "film_id", type: "one-to-many" },
+      { from: "inventory", fromColumn: "store_id", to: "store", toColumn: "store_id", type: "one-to-many" },
+      { from: "payment", fromColumn: "customer_id", to: "customer", toColumn: "customer_id", type: "one-to-many" },
+      { from: "payment", fromColumn: "staff_id", to: "staff", toColumn: "staff_id", type: "one-to-many" },
+      { from: "payment", fromColumn: "rental_id", to: "rental", toColumn: "rental_id", type: "one-to-many" },
+      { from: "rental", fromColumn: "inventory_id", to: "inventory", toColumn: "inventory_id", type: "one-to-many" },
+      { from: "rental", fromColumn: "customer_id", to: "customer", toColumn: "customer_id", type: "one-to-many" },
+      { from: "rental", fromColumn: "staff_id", to: "staff", toColumn: "staff_id", type: "one-to-many" },
+      { from: "staff", fromColumn: "address_id", to: "address", toColumn: "address_id", type: "one-to-many" },
+      { from: "staff", fromColumn: "store_id", to: "store", toColumn: "store_id", type: "one-to-many" },
+      { from: "store", fromColumn: "manager_staff_id", to: "staff", toColumn: "staff_id", type: "one-to-one" },
+      { from: "store", fromColumn: "address_id", to: "address", toColumn: "address_id", type: "one-to-many" }
+    ];
+
+    // Función para renderizar las tablas
+    function renderTables() {
+      const container = document.getElementById('tables-grid');
+      container.innerHTML = '';
+      
+      tables.forEach(table => {
+        const tableElement = document.createElement('div');
+        tableElement.className = 'table';
+        tableElement.id = `table-${table.name}`;
+        tableElement.dataset.tableName = table.name;
+        
+        let columnsHTML = '';
+        table.columns.forEach(column => {
+          const icon = column.type === 'pk' ? '🔑' : column.type === 'fk' ? '🔗' : '📄';
+          const columnClass = column.type === 'pk' ? 'pk' : column.type === 'fk' ? 'fk' : '';
+          
+          columnsHTML += `
+            <div class="column ${columnClass}" data-column-name="${column.name}">
+              <span class="column-icon">${icon}</span>
+              <span>${column.name}</span>
+            </div>
+          `;
+        });
+        
+        tableElement.innerHTML = `
+          <div class="table-header">
+            <span class="table-name">${table.name}</span>
+          </div>
+          <div class="table-content">
+            ${columnsHTML}
+          </div>
+        `;
+        
+        container.appendChild(tableElement);
+      });
+    }
+
+    // Función para dibujar las relaciones
+    function drawRelationships() {
+      const svg = document.getElementById('relationships-layer');
+      svg.innerHTML = `
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#3498db">
+            <polygon points="0 0, 10 3.5, 0 7" />
+          </marker>
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#e74c3c">
+            <polygon points="0 0, 10 3.5, 0 7" />
+          </marker>
+          <marker id="arrowhead-thick" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto" fill="#2ecc71">
+            <polygon points="0 0, 12 4, 0 8" />
+          </marker>
+        </defs>
+      `;
+      
+      relationships.forEach(rel => {
+        const fromTable = document.getElementById(`table-${rel.from}`);
+        const toTable = document.getElementById(`table-${rel.to}`);
+        
+        if (!fromTable || !toTable) return;
+        
+        const fromRect = fromTable.getBoundingClientRect();
+        const toRect = toTable.getBoundingClientRect();
+        const containerRect = document.querySelector('.schema-container').getBoundingClientRect();
+        
+        // Calcular posición relativa al contenedor
+        const fromX = fromRect.left - containerRect.left + fromRect.width;
+        const fromY = fromRect.top - containerRect.top + getColumnYPosition(fromTable, rel.fromColumn);
+        const toX = toRect.left - containerRect.left;
+        const toY = toRect.top - containerRect.top + getColumnYPosition(toTable, rel.toColumn);
+        
+        // Crear línea
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', fromX);
+        line.setAttribute('y1', fromY);
+        line.setAttribute('x2', toX);
+        line.setAttribute('y2', toY);
+        
+        // Asignar clase según el tipo de relación
+        if (rel.type === 'many-to-many') {
+          line.setAttribute('class', 'relationship-line-dashed');
+        } else if (rel.type === 'one-to-one') {
+          line.setAttribute('class', 'relationship-line-thick');
+        } else {
+          line.setAttribute('class', 'relationship-line');
+        }
+        
+        svg.appendChild(line);
+      });
+    }
+
+    // Función para obtener la posición Y de una columna específica
+    function getColumnYPosition(tableElement, columnName) {
+      const columns = tableElement.querySelectorAll('.column');
+      for (let i = 0; i < columns.length; i++) {
+        if (columns[i].dataset.columnName === columnName) {
+          const columnRect = columns[i].getBoundingClientRect();
+          const tableRect = tableElement.getBoundingClientRect();
+          return columnRect.top - tableRect.top + columnRect.height / 2;
+        }
+      }
+      return tableElement.getBoundingClientRect().height / 2;
+    }
+
+    // Funciones para resaltar elementos
+    function setupHighlighting() {
+      document.getElementById('highlight-pk').addEventListener('click', () => {
+        document.querySelectorAll('.pk').forEach(pk => {
+          pk.style.backgroundColor = 'rgba(231, 76, 60, 0.2)';
+          pk.style.fontWeight = 'bold';
+        });
+      });
+      
+      document.getElementById('highlight-fk').addEventListener('click', () => {
+        document.querySelectorAll('.fk').forEach(fk => {
+          fk.style.backgroundColor = 'rgba(52, 152, 219, 0.2)';
+          fk.style.fontWeight = 'bold';
+        });
+      });
+      
+      document.getElementById('reset-highlight').addEventListener('click', () => {
+        document.querySelectorAll('.pk, .fk').forEach(el => {
+          el.style.backgroundColor = '';
+          el.style.fontWeight = '';
+        });
+      });
+    }
+
+    // Redibujar relaciones cuando cambie el tamaño de la ventana
+    window.addEventListener('resize', drawRelationships);
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTables();
+      // Esperar un momento para que las tablas se rendericen antes de dibujar las relaciones
+      setTimeout(drawRelationships, 100);
+      setupHighlighting();
+    });
+  </script>
+</body>
+</html>
