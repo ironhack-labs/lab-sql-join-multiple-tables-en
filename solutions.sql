@@ -37,7 +37,7 @@ LIMIT 5;
 
 -- Challenge 5: 
 -- Display the most frequently rented movies in descending order.
-SELECT f.title, SUM(r.inventory_id) AS freq_rent
+SELECT f.title, COUNT(r.rental_id) AS freq_rent
 FROM rental AS r
 JOIN inventory AS i ON r.inventory_id = i.inventory_id
 JOIN film AS f ON i.film_id = f.film_id
@@ -47,9 +47,9 @@ LIMIT 5;
 
 -- Challenge 6: 
 -- List the top five genres in gross revenue in descending order.
-SELECT c.name, SUM(p.amount) AS gross_revenue
+SELECT c.name, SUM(r.amount) AS gross_revenue
 FROM category AS c
-JOIN film_category AS f ON c.category_id = f.category_id
+JOIN film_category AS fc ON c.category_id = fc.category_id
 JOIN inventory	AS i ON f.film_id = i.film_id 
 JOIN rental AS r ON i.inventory_id = r.inventory_id
 JOIN payment AS p ON r.rental_id = p.rental_id
@@ -62,6 +62,6 @@ LIMIT 5;
 SELECT f.title, i.store_id, COUNT(i.inventory_id) AS avail_copie
 FROM film_list AS f
 JOIN inventory AS i ON f.FID = i.film_id
-LEFT JOIN rental AS r ON i.inventory_id = r.inventory_id
-WHERE f.title = "Academy Dinosaur" AND i.store_id = 1 AND r.return_date IS NOT NULL
+LEFT JOIN rental AS r ON i.inventory_id = r.inventory_id AND r.return_date IS NULL 
+WHERE f.title = "Academy Dinosaur" AND i.store_id = 1 AND r.return_date IS NULL
 GROUP BY f.title, i.store_id;
