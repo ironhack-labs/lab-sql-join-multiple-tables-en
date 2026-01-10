@@ -15,3 +15,4 @@ You can save your solutions in a file `solutions.sql`.
 5. Display the most frequently rented movies in descending order.
 6. List the top five genres in gross revenue in descending order.
 7. Is "Academy Dinosaur" available for rent from Store 1?
+pls. foolow my answers
