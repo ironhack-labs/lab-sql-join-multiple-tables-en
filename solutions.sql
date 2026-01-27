@@ -18,7 +18,7 @@ GROUP BY 1;
 
 SELECT c.name, round(avg(f.length),2) as avg_film_length
 FROM category c
-	LEFT JOIN film_category fc on fc.category_id = c.category_id
+	JOIN film_category fc on fc.category_id = c.category_id
 	JOIN film f on f.film_id = fc.film_id
 GROUP BY 1
 ORDER BY 2;
@@ -27,7 +27,7 @@ ORDER BY 2;
 
 SELECT c.name, round(max(f.length),2) as max_film_length
 FROM category c
-	LEFT JOIN film_category fc on fc.category_id = c.category_id
+	JOIN film_category fc on fc.category_id = c.category_id
 	JOIN film f on f.film_id = fc.film_id
 GROUP BY 1
 ORDER BY 2 DESC;
@@ -58,7 +58,7 @@ LIMIT 5;
 
 WITH temp as (
 
-SELECT f.title,i.inventory_id, i.store_id, r.rental_id, case when date() > r.return_date then 'Yes' else 'No' end as available
+SELECT f.title,i.inventory_id, i.store_id, r.rental_id, case when date() > r.return_date OR r.return_date is null then 'Yes' else 'No' end as available
 FROM film f
 	JOIN inventory i on i.film_id = f.film_id
 	LEFT JOIN rental r on r.inventory_id = i.inventory_id 
