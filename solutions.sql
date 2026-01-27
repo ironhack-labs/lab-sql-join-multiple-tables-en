@@ -14,24 +14,25 @@ JOIN payment AS p ON stf.staff_id = p.staff_id
 GROUP BY stf.store_id;
 
 -- 3. What is the average running time of films by category?
-SELECT c.name as category, ROUND(AVG(f.length), 2) AS "avg length"
+SELECT c.name as category, ROUND(AVG(f.rental_duration), 2) AS "avg duration"
 FROM category as c
 JOIN film_category as fc ON c.category_id = fc.category_id
 JOIN film as f ON fc.film_id = f.film_id
 GROUP BY c.name;
 
 -- 4.Which film categories are longest?
-SELECT c.name as category, ROUND(AVG(f.length), 2) AS "avg length"
+SELECT c.name as category, SUM(f.length) AS "SUM length"
 FROM category as c
 JOIN film_category as fc ON c.category_id = fc.category_id
 JOIN film as f ON fc.film_id = f.film_id
 GROUP BY c.name
-ORDER BY "avg length" DESC;
+ORDER BY "SUM length" DESC;
 
 -- 5.Display the most frequently rented movies in descending order.
-SELECT f.title, count(i.inventory_id) as frequency
+SELECT f.title, count(r.rental_id) as frequency
 FROM film AS f
 JOIN inventory AS i ON i.film_id = f.film_id
+JOIN rental AS r ON i.inventory_id = r.inventory_id
 GROUP BY f.title
 ORDER BY frequency DESC;
 
@@ -55,7 +56,7 @@ SELECT f.title,
 FROM film as f
 JOIN inventory AS i ON i.film_id = f.film_id
 GROUP BY f.title
-HAVING f.title = "ACADEMY DINOSAUR"
+HAVING f.title == "ACADEMY DINOSAUR"
 	
 		
 
