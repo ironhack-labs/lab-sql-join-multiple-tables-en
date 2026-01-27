@@ -14,7 +14,7 @@ JOIN payment AS p ON stf.staff_id = p.staff_id
 GROUP BY stf.store_id;
 
 -- 3. What is the average running time of films by category?
-SELECT c.name as category, ROUND(AVG(f.rental_duration), 2) AS "avg duration"
+SELECT c.name as category, ROUND(AVG(f.length), 2) AS "avg length"
 FROM category as c
 JOIN film_category as fc ON c.category_id = fc.category_id
 JOIN film as f ON fc.film_id = f.film_id
@@ -56,7 +56,7 @@ SELECT f.title,
 FROM film as f
 JOIN inventory AS i ON i.film_id = f.film_id
 GROUP BY f.title
-HAVING f.title == "ACADEMY DINOSAUR"
+HAVING f.title = "ACADEMY DINOSAUR"
 	
 		
 
