@@ -37,25 +37,24 @@ GROUP BY f.title
 ORDER BY total_rental_times DESC;
 
 -- 6. List the top five genres in gross revenue in descending order.
-SELECT f.title, sum(f.rental_rate) AS gross_revenue
+SELECT c.name, sum(f.rental_rate) AS gross_revenue
 FROM rental as r
 JOIN inventory AS i ON i.inventory_id = r.inventory_id
 JOIN film AS f ON f.film_id = i.film_id
 JOIN film_category AS fc ON fc.film_id = f.film_id
 JOIN category AS c ON c.category_id = fc.category_id
-GROUP BY f.title
+GROUP BY c.category_id
 ORDER BY gross_revenue DESC
 LIMIT 5;
 
 -- 7. Is "Academy Dinosaur" available for rent from Store 1?
 SELECT  f.title AS MOVIE_TITLE, 
 	CASE
-		WHEN count(*) - count(r.rental_id) > 0 THEN "Not available in store 1"	-- count(*) will count all the rows -> count(columnname) will count without NULL values
+		WHEN count(*) - count(r.rental_id) = count(Distinct(i.inventory_id)) THEN "Not available in store 1"	-- count(*) will count all the rows -> count(columnname) will count without NULL values
 		ELSE "available in store 1"
 	END AS MESSAGE
 FROM inventory AS i
 JOIN rental AS r ON i.inventory_id = r.inventory_id
 JOIN film AS f ON f.film_id = i.film_id 
-WHERE i.store_id == 1 AND f.title like "Academy Dinosaur" 
-
+WHERE i.store_id == 1 AND f.title like "Academy Dinosaur";
 
