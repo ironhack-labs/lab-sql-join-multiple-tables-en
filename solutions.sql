@@ -15,13 +15,9 @@ JOIN country co
 SELECT
 	s.store_id AS `STORE`,
 	SUM(p.amount) AS `TOTAL_SALES_$`
-FROM store s
-JOIN inventory i
-	ON `STORE` = i.store_id
-JOIN rental r
-	ON i.inventory_id = r.inventory_id
+FROM staff s
 JOIN payment p
-	ON r.rental_id = p.rental_id
+	ON s.staff_id = p.staff_id
 GROUP BY `STORE`;
 
 
@@ -40,14 +36,14 @@ GROUP BY `CATEGORY`;
 -- QUERY 4
 SELECT
 	c.name AS `CATEGORY`,
-	ROUND(AVG(f.`length`), 2) AS AVERAGE_RUNNING_TIME
+	SUM(f.`length`) AS TOTAL_RUNNING_TIME
 FROM film_category fc
 JOIN film f
 	ON fc.film_id = f.film_id
 JOIN category c
 	ON fc.category_id = c.category_id
 GROUP BY `CATEGORY`
-ORDER BY AVERAGE_RUNNING_TIME DESC
+ORDER BY TOTAL_RUNNING_TIME DESC
 LIMIT 5;
 
 
@@ -88,7 +84,7 @@ SELECT
   f.title,
   CASE
     WHEN SUM(CASE WHEN r.rental_id IS NULL OR r.return_date IS NOT NULL THEN 1 ELSE 0 END) > 0
-    THEN 'Yes' ELSE 'No'
+      THEN 'Yes' ELSE 'No'
   END AS available
 FROM film f
 JOIN inventory i
@@ -100,7 +96,5 @@ LEFT JOIN rental r
     FROM rental rr
     WHERE rr.inventory_id = i.inventory_id
 	)
-WHERE
-  f.title = 'ACADEMY DINOSAUR'
-  AND i.store_id = 1
+WHERE f.title = 'ACADEMY DINOSAUR' AND i.store_id = 1
 GROUP BY f.title;
