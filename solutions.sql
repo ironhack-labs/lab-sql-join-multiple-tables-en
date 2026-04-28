@@ -52,7 +52,14 @@ JOIN film on film.film_id = inventory.film_id
 JOIN film_category on film_category.film_id = film.film_id
 JOIN category on category.category_id = film_category.category_id
 GROUP by category.name
-ORDER by gross_revenue DESC;
+ORDER by gross_revenue DESC
+limit 5;
 
 
+--7. Is "Academy Dinosaur" available for rent from Store 1?
 
+SELECT film.title
+from film
+JOIN inventory on inventory.film_id = film.film_id
+JOIN store on store.store_id = inventory.store_id
+WHERE film.title = 'ACADEMY DINOSAUR' AND store.store_id = 1;
