@@ -7,6 +7,7 @@ JOIN city c ON a.city_id = c.city_id
 JOIN country co ON c.country_id = co.country_id;
 
 --Write a query to display how much business, in dollars, each store brought in.
+
 SELECT s.store_id, sbs.total_sales
 from store s
 JOIN sales_by_store sbs on s.store_id = sbs.store_id;
