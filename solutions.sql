@@ -78,20 +78,23 @@ ORDER BY gross_revenue DESC
 LIMIT 5;
 
 -- 7. Check whether at least one copy of "Academy Dinosaur" is available at Store 1.
-SELECT CASE
-    WHEN EXISTS (
-        SELECT 1
-        FROM film AS f
-        JOIN inventory AS i
-            ON i.film_id = f.film_id
-        WHERE f.title = 'Academy Dinosaur'
-          AND i.store_id = 1
-          AND NOT EXISTS (
-              SELECT 1
-              FROM rental AS r
-              WHERE r.inventory_id = i.inventory_id
-                AND r.return_date IS NULL
-          )
-    ) THEN 'Yes'
-    ELSE 'No'
-END AS available_for_rent;
+SELECT
+    'Academy Dinosaur' AS title,
+    1 AS store_id,
+    CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM film AS f
+            JOIN inventory AS i
+                ON i.film_id = f.film_id
+            WHERE f.title = 'Academy Dinosaur'
+              AND i.store_id = 1
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM rental AS r
+                  WHERE r.inventory_id = i.inventory_id
+                    AND r.return_date IS NULL
+              )
+        ) THEN 'Yes'
+        ELSE 'No'
+    END AS available_for_rent;
